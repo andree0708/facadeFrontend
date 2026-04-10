@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+const API_URL = import.meta.env.PUBLIC_API_URL || 'https://facadebackend.onrender.com';
 ---
 
 <Layout title="Sistema de Gestión Médica">
@@ -52,6 +53,7 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script is:inline>
+	const API_URL = "https://facadebackend.onrender.com";
 	let currentPatientId = null;
 
 	document.getElementById('loginTab').addEventListener('click', () => showAuthForm('login'));
@@ -78,7 +80,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 
 		try {
-			const response = await fetch('https://clinica-backend-production.up.railway.app/api/clinica/paciente', {
+			const response = await fetch(`${API_URL}/api/clinica/paciente`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name, document, email, phone, birthDate, allergies })
@@ -107,7 +109,7 @@ import Layout from '../layouts/Layout.astro';
 		}
 
 		try {
-			const patients = await fetch('https://clinica-backend-production.up.railway.app/api/clinica/paciente').then(r => r.json());
+			const patients = await fetch(`${API_URL}/api/clinica/paciente`).then(r => r.json());
 			const patient = patients.find(p => p.document === document);
 			
 			if (patient) {
