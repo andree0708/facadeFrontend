@@ -191,8 +191,11 @@ import Layout from '../layouts/Layout.astro';
 			patientId: currentPatientId,
 			specialty: specialty,
 			doctorId: doctorId,
-			dateTime: dateTime
+			dateTime: date + 'T' + time
 		};
+		};
+
+		console.log('Date:', date, 'Time:', time, 'Combined:', dateTime);
 
 		console.log('Sending request:', JSON.stringify(requestBody));
 
