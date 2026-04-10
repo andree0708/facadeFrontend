@@ -18,31 +18,31 @@ import Layout from '../layouts/Layout.astro';
 			<div id="loginForm" class="auth-form">
 				<div class="form-group">
 					<label for="loginDoc">Número de Documento</label>
-					<input type="text" id="loginDoc" placeholder="Ingrese su documento">
+					<input type="text" id="loginDoc" placeholder="Ingrese su documento" required>
 				</div>
 				<button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Ingresar</button>
 			</div>
 			
 			<div id="registerForm" class="auth-form" style="display: none;">
 				<div class="form-group">
-					<label for="regName">Nombre Completo</label>
-					<input type="text" id="regName" placeholder="Ingrese su nombre">
+					<label for="regName">Nombre Completo *</label>
+					<input type="text" id="regName" placeholder="Ingrese su nombre" required minlength="2">
 				</div>
 				<div class="form-group">
-					<label for="regDoc">Número de Documento</label>
-					<input type="text" id="regDoc" placeholder="Ingrese su documento">
+					<label for="regDoc">Número de Documento *</label>
+					<input type="text" id="regDoc" placeholder="Ingrese su documento" required minlength="5">
 				</div>
 				<div class="form-group">
-					<label for="regEmail">Correo Electrónico</label>
-					<input type="email" id="regEmail" placeholder="Ingrese su correo">
+					<label for="regEmail">Correo Electrónico *</label>
+					<input type="email" id="regEmail" placeholder="ejemplo@correo.com" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
 				</div>
 				<div class="form-group">
-					<label for="regPhone">Teléfono</label>
-					<input type="tel" id="regPhone" placeholder="Ingrese su teléfono">
+					<label for="regPhone">Teléfono *</label>
+					<input type="tel" id="regPhone" placeholder="3001234567" required pattern="[0-9]{10}">
 				</div>
 				<div class="form-group">
-					<label for="regBirthDate">Fecha de Nacimiento</label>
-					<input type="date" id="regBirthDate">
+					<label for="regBirthDate">Fecha de Nacimiento *</label>
+					<input type="date" id="regBirthDate" required>
 				</div>
 				<div class="form-group">
 					<label for="regAllergies">Alergias (opcional)</label>
@@ -70,6 +70,19 @@ import Layout from '../layouts/Layout.astro';
 		hideMessage();
 	}
 
+	function validateEmail(email) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
+	function validateDocument(document) {
+		return document.length >= 5;
+	}
+
+	function validatePhone(phone) {
+		return phone.length >= 7 && /^\d+$/.test(phone);
+	}
+
 	async function handleRegister() {
 		const name = document.getElementById('regName').value.trim();
 		const docNumber = document.getElementById('regDoc').value.trim();
@@ -80,6 +93,26 @@ import Layout from '../layouts/Layout.astro';
 
 		if (!name || !docNumber || !email || !phone || !birthDate) {
 			showMessage('Por favor complete todos los campos requeridos', 'error');
+			return;
+		}
+
+		if (name.length < 2) {
+			showMessage('El nombre debe tener al menos 2 caracteres', 'error');
+			return;
+		}
+
+		if (!validateDocument(docNumber)) {
+			showMessage('El documento debe tener al menos 5 caracteres', 'error');
+			return;
+		}
+
+		if (!validateEmail(email)) {
+			showMessage('Por favor ingrese un correo electrónico válido (ej: usuario@correo.com)', 'error');
+			return;
+		}
+
+		if (!validatePhone(phone)) {
+			showMessage('El teléfono debe tener al menos 7 dígitos', 'error');
 			return;
 		}
 
@@ -257,6 +290,10 @@ import Layout from '../layouts/Layout.astro';
 
 	.form-group input::placeholder {
 		color: #aaa;
+	}
+
+	.form-group input:invalid {
+		border-color: #dc2626;
 	}
 
 	.btn {

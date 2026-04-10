@@ -22,8 +22,8 @@ import Layout from '../layouts/Layout.astro';
 			<h2 style="margin-bottom: 16px; color: #1e3a5f;">Agendar Nueva Cita</h2>
 			<div class="form-grid">
 				<div class="form-group">
-					<label for="specialty">Especialidad</label>
-					<select id="specialty">
+					<label for="specialty">Especialidad *</label>
+					<select id="specialty" required>
 						<option value="">Seleccionar especialidad</option>
 						<option value="Cardiology">Cardiología</option>
 						<option value="General Medicine">Medicina General</option>
@@ -32,23 +32,23 @@ import Layout from '../layouts/Layout.astro';
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="doctor">Médico</label>
-					<select id="doctor" disabled>
+					<label for="doctor">Médico *</label>
+					<select id="doctor" disabled required>
 						<option value="">Seleccione médico</option>
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="date">Fecha</label>
-					<input type="date" id="date" min="">
+					<label for="date">Fecha *</label>
+					<input type="date" id="date" required disabled>
 				</div>
 				<div class="form-group">
-					<label for="time">Hora</label>
-					<select id="time" disabled>
+					<label for="time">Hora *</label>
+					<select id="time" disabled required>
 						<option value="">Seleccione horario</option>
 					</select>
 				</div>
 			</div>
-			<button class="btn btn-primary" onclick="scheduleAppointment()">Agendar Cita</button>
+			<button class="btn btn-primary" id="scheduleBtn" onclick="scheduleAppointment()">Agendar Cita</button>
 			<div id="appointmentMessage" class="alert" style="display: none; margin-top: 16px;"></div>
 		</div>
 
@@ -82,11 +82,15 @@ import Layout from '../layouts/Layout.astro';
 	document.getElementById('specialty').addEventListener('change', async (e) => {
 		const specialty = e.target.value;
 		const doctorSelect = document.getElementById('doctor');
+		const dateInput = document.getElementById('date');
 		const timeSelect = document.getElementById('time');
 		
 		doctorSelect.innerHTML = '<option value="">Cargando...</option>';
 		timeSelect.innerHTML = '<option value="">Seleccione horario</option>';
 		timeSelect.disabled = true;
+		dateInput.disabled = true;
+		dateInput.value = '';
+		timeSelect.value = '';
 
 		if (specialty) {
 			try {
@@ -100,6 +104,7 @@ import Layout from '../layouts/Layout.astro';
 				doctorSelect.disabled = false;
 			} catch (error) {
 				console.error('Error loading doctors:', error);
+				showMessage('Error al cargar médicos', 'error');
 			}
 		} else {
 			doctorSelect.innerHTML = '<option value="">Seleccione médico</option>';
@@ -107,31 +112,51 @@ import Layout from '../layouts/Layout.astro';
 		}
 	});
 
-	document.getElementById('doctor').addEventListener('change', async (e) => {
+	document.getElementById('doctor').addEventListener('change', (e) => {
 		const doctorId = e.target.value;
-		const date = document.getElementById('date').value;
+		const dateInput = document.getElementById('date');
+		const timeSelect = document.getElementById('time');
+		
+		if (doctorId) {
+			dateInput.disabled = false;
+			dateInput.value = '';
+			timeSelect.innerHTML = '<option value="">Seleccione horario</option>';
+			timeSelect.disabled = true;
+			timeSelect.value = '';
+		} else {
+			dateInput.disabled = true;
+			dateInput.value = '';
+			timeSelect.disabled = true;
+			timeSelect.value = '';
+		}
+	});
+
+	document.getElementById('date').addEventListener('change', async (e) => {
+		const doctorId = document.getElementById('doctor').value;
+		const date = e.target.value;
 		const timeSelect = document.getElementById('time');
 		
 		if (doctorId && date) {
+			timeSelect.innerHTML = '<option value="">Cargando...</option>';
+			timeSelect.disabled = true;
+			
 			try {
 				const response = await fetch(`${API_URL}/horarios/${doctorId}?date=${date}T00:00:00`);
 				schedules = await response.json();
 				
-				timeSelect.innerHTML = '<option value="">Seleccionar horario</option>';
-				schedules.forEach(time => {
-					timeSelect.innerHTML += `<option value="${time}">${time}</option>`;
-				});
-				timeSelect.disabled = false;
+				if (schedules.length > 0) {
+					timeSelect.innerHTML = '<option value="">Seleccionar horario</option>';
+					schedules.forEach(time => {
+						timeSelect.innerHTML += `<option value="${time}">${time}</option>`;
+					});
+					timeSelect.disabled = false;
+				} else {
+					timeSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
+				}
 			} catch (error) {
 				console.error('Error loading schedules:', error);
+				showMessage('Error al cargar horarios', 'error');
 			}
-		}
-	});
-
-	document.getElementById('date').addEventListener('change', (e) => {
-		const doctorId = document.getElementById('doctor').value;
-		if (doctorId) {
-			document.getElementById('doctor').dispatchEvent(new Event('change'));
 		}
 	});
 
@@ -142,11 +167,14 @@ import Layout from '../layouts/Layout.astro';
 		const time = document.getElementById('time').value;
 
 		if (!specialty || !doctorId || !date || !time) {
-			showMessage('Por favor complete todos los campos', 'error');
+			showMessage('Por favor complete todos los campos requeridos', 'error');
 			return;
 		}
 
 		const dateTime = `${date}T${time}:00`;
+		const scheduleBtn = document.getElementById('scheduleBtn');
+		scheduleBtn.disabled = true;
+		scheduleBtn.textContent = 'Agendando...';
 
 		try {
 			const response = await fetch(`${API_URL}/cita`, {
@@ -161,19 +189,25 @@ import Layout from '../layouts/Layout.astro';
 			});
 
 			if (response.ok) {
-				showMessage('Cita agendada exitosamente', 'success');
+				const appointment = await response.json();
+				showMessage('Cita agendada exitosamente. Recordatorio: tiene cita el ' + new Date(appointment.dateTime).toLocaleString('es-CO') + ' con ' + appointment.doctorName, 'success');
 				loadAppointments();
 				document.getElementById('specialty').value = '';
 				document.getElementById('doctor').innerHTML = '<option value="">Seleccione médico</option>';
 				document.getElementById('doctor').disabled = true;
 				document.getElementById('date').value = '';
+				document.getElementById('date').disabled = true;
 				document.getElementById('time').innerHTML = '<option value="">Seleccione horario</option>';
 				document.getElementById('time').disabled = true;
 			} else {
-				showMessage('Error al agendar la cita', 'error');
+				const errorData = await response.json().catch(() => ({ message: 'Error al agendar' }));
+				showMessage(errorData.message || 'Error al agendar la cita. El horario puede estar ocupado.', 'error');
 			}
 		} catch (error) {
 			showMessage('Error de conexión', 'error');
+		} finally {
+			scheduleBtn.disabled = false;
+			scheduleBtn.textContent = 'Agendar Cita';
 		}
 	}
 
@@ -182,7 +216,7 @@ import Layout from '../layouts/Layout.astro';
 		msgDiv.textContent = message;
 		msgDiv.className = `alert alert-${type}`;
 		msgDiv.style.display = 'block';
-		setTimeout(() => msgDiv.style.display = 'none', 5000);
+		setTimeout(() => msgDiv.style.display = 'none', 8000);
 	}
 
 	let currentTab = 'upcoming';
@@ -239,9 +273,10 @@ import Layout from '../layouts/Layout.astro';
 		
 		try {
 			await fetch(`${API_URL}/cita/${appointmentId}`, { method: 'DELETE' });
+			showMessage('Cita cancelada exitosamente', 'success');
 			loadAppointments();
 		} catch (error) {
-			console.error('Error cancelling appointment:', error);
+			showMessage('Error al cancelar la cita', 'error');
 		}
 	}
 
