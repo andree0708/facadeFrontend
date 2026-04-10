@@ -50,6 +50,7 @@ import Layout from '../layouts/Layout.astro';
 			</div>
 			<button class="btn btn-primary" id="scheduleBtn" onclick="scheduleAppointment()">Agendar Cita</button>
 			<div id="appointmentMessage" class="alert" style="display: none; margin-top: 16px;"></div>
+			<div id="debugInfo" style="margin-top: 10px; font-size: 12px; color: #666; display: none;"></div>
 		</div>
 
 		<div class="card">
@@ -69,7 +70,11 @@ import Layout from '../layouts/Layout.astro';
 	const API_URL = 'https://facadebackend.onrender.com/api/clinica';
 	const patientId = localStorage.getItem('patientId');
 
+	document.getElementById('debugInfo').textContent = 'Patient ID: ' + (patientId || 'NULL');
+	document.getElementById('debugInfo').style.display = 'block';
+
 	if (!patientId) {
+		alert('No hay sesión activa. Por favor inicie sesión.');
 		window.location.href = '/';
 	}
 
@@ -171,22 +176,34 @@ import Layout from '../layouts/Layout.astro';
 			return;
 		}
 
+		const currentPatientId = localStorage.getItem('patientId');
+		if (!currentPatientId) {
+			showMessage('Sesión expirada. Por favor inicie sesión nuevamente.', 'error');
+			return;
+		}
+
 		const dateTime = `${date}T${time}:00`;
 		const scheduleBtn = document.getElementById('scheduleBtn');
 		scheduleBtn.disabled = true;
 		scheduleBtn.textContent = 'Agendando...';
 
+		const requestBody = {
+			patientId: currentPatientId,
+			specialty: specialty,
+			doctorId: doctorId,
+			dateTime: dateTime
+		};
+
+		console.log('Sending request:', JSON.stringify(requestBody));
+
 		try {
 			const response = await fetch(`${API_URL}/cita`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					patientId,
-					specialty,
-					doctorId,
-					dateTime
-				})
+				body: JSON.stringify(requestBody)
 			});
+
+			console.log('Response status:', response.status);
 
 			if (response.ok) {
 				const appointment = await response.json();
@@ -200,11 +217,13 @@ import Layout from '../layouts/Layout.astro';
 				document.getElementById('time').innerHTML = '<option value="">Seleccione horario</option>';
 				document.getElementById('time').disabled = true;
 			} else {
-				const errorData = await response.json().catch(() => ({ message: 'Error al agendar' }));
-				showMessage(errorData.message || 'Error al agendar la cita. El horario puede estar ocupado.', 'error');
+				const errorText = await response.text();
+				console.error('Error response:', errorText);
+				showMessage('Error al agendar la cita: ' + errorText, 'error');
 			}
 		} catch (error) {
-			showMessage('Error de conexión', 'error');
+			console.error('Connection error:', error);
+			showMessage('Error de conexión: ' + error.message, 'error');
 		} finally {
 			scheduleBtn.disabled = false;
 			scheduleBtn.textContent = 'Agendar Cita';
