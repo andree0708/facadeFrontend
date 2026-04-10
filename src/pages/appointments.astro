@@ -182,7 +182,6 @@ import Layout from '../layouts/Layout.astro';
 			return;
 		}
 
-		const dateTime = `${date}T${time}`;
 		const scheduleBtn = document.getElementById('scheduleBtn');
 		scheduleBtn.disabled = true;
 		scheduleBtn.textContent = 'Agendando...';
@@ -193,9 +192,6 @@ import Layout from '../layouts/Layout.astro';
 			doctorId: doctorId,
 			dateTime: date + 'T' + time
 		};
-		};
-
-		console.log('Date:', date, 'Time:', time, 'Combined:', dateTime);
 
 		console.log('Sending request:', JSON.stringify(requestBody));
 
