@@ -2,62 +2,62 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Medical History - Medical Management System">
+<Layout title="Historia Clínica - Sistema de Gestión Médica">
 	<nav class="nav">
 		<div class="logo">
-			<h2 style="color: #667eea;">🏥 Health System</h2>
+			<h2 style="color: #1e3a5f;">🏥 Sistema de Salud</h2>
 		</div>
 		<div class="nav-links">
 			<a href="/dashboard">Dashboard</a>
-			<a href="/appointments">Appointments</a>
-			<a href="/history" class="active">Medical History</a>
-			<a href="#" onclick="logout()">Logout</a>
+			<a href="/appointments">Citas</a>
+			<a href="/history" class="active">Historia Clínica</a>
+			<a href="#" onclick="logout()">Cerrar Sesión</a>
 		</div>
 	</nav>
 
 	<div class="container">
-		<h1 style="margin-bottom: 24px; color: white;">Complete Medical History</h1>
+		<h1 style="margin-bottom: 24px; color: white;">Historia Clínica Completa</h1>
 		
 		<div class="card">
 			<div class="tabs">
-				<button class="tab active" onclick="showTab('consultations')">Consultations</button>
-				<button class="tab" onclick="showTab('prescriptions')">Prescriptions</button>
-				<button class="tab" onclick="showTab('laboratory')">Laboratory</button>
-				<button class="tab" onclick="showTab('new-lab')">Request Tests</button>
+				<button class="tab active" onclick="showTab('consultations')">Consultas</button>
+				<button class="tab" onclick="showTab('prescriptions')">Prescripciones</button>
+				<button class="tab" onclick="showTab('laboratory')">Laboratorio</button>
+				<button class="tab" onclick="showTab('new-lab')">Solicitar Exámenes</button>
 			</div>
 
 			<div id="consultationsTab">
-				<h3 style="margin: 16px 0;">Consultation History</h3>
+				<h3 style="margin: 16px 0; color: #1e3a5f;">Historial de Consultas</h3>
 				<div id="consultationsList">
-					<p style="color: #6b7280;">Loading...</p>
+					<p style="color: #666; text-align: center;">Cargando...</p>
 				</div>
 			</div>
 
 			<div id="prescriptionsTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Medical Prescriptions</h3>
+				<h3 style="margin: 16px 0; color: #1e3a5f;">Prescripciones Médicas</h3>
 				<div id="prescriptionsList">
-					<p style="color: #6b7280;">Loading...</p>
+					<p style="color: #666; text-align: center;">Cargando...</p>
 				</div>
 			</div>
 
 			<div id="laboratoryTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Laboratory Results</h3>
+				<h3 style="margin: 16px 0; color: #1e3a5f;">Resultados de Laboratorio</h3>
 				<div id="laboratoryList">
-					<p style="color: #6b7280;">Loading...</p>
+					<p style="color: #666; text-align: center;">Cargando...</p>
 				</div>
 			</div>
 
 			<div id="newLabTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Request Laboratory Tests</h3>
+				<h3 style="margin: 16px 0; color: #1e3a5f;">Solicitar Exámenes de Laboratorio</h3>
 				<div class="form-group">
-					<label>Select Tests:</label>
+					<label>Seleccionar Exámenes:</label>
 					<div class="checkbox-group">
-						<label><input type="checkbox" value="hemograma"> Hemogram</label>
-						<label><input type="checkbox" value="glicemia"> Blood Glucose</label>
-						<label><input type="checkbox" value="perfil lipídico"> Lipid Profile</label>
+						<label><input type="checkbox" value="hemograma"> Hemograma</label>
+						<label><input type="checkbox" value="glicemia"> Glicemia</label>
+						<label><input type="checkbox" value="perfil lipídico"> Perfil Lipídico</label>
 					</div>
 				</div>
-				<button class="btn btn-primary" onclick="requestLabTests()">Request Tests</button>
+				<button class="btn btn-primary" onclick="requestLabTests()">Solicitar Exámenes</button>
 				<div id="labRequestMessage" class="alert" style="display: none; margin-top: 16px;"></div>
 			</div>
 		</div>
@@ -83,17 +83,17 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Date</th>
-								<th>Doctor</th>
-								<th>Specialty</th>
-								<th>Diagnosis</th>
-								<th>Reason</th>
+								<th>Fecha</th>
+								<th>Médico</th>
+								<th>Especialidad</th>
+								<th>Diagnóstico</th>
+								<th>Motivo</th>
 							</tr>
 						</thead>
 						<tbody>
 							${history.consultations.map(c => `
 								<tr>
-									<td>${new Date(c.date).toLocaleString()}</td>
+									<td>${new Date(c.date).toLocaleString('es-CO')}</td>
 									<td>${c.doctorName}</td>
 									<td>${c.specialty}</td>
 									<td>${c.diagnosis}</td>
@@ -104,7 +104,7 @@ import Layout from '../layouts/Layout.astro';
 					</table>
 				`;
 			} else {
-				consultationsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No consultations recorded</p>';
+				consultationsDiv.innerHTML = '<p style="color: #666; text-align: center;">No hay consultas registradas</p>';
 			}
 
 			const prescriptionsDiv = document.getElementById('prescriptionsList');
@@ -112,15 +112,15 @@ import Layout from '../layouts/Layout.astro';
 				prescriptionsDiv.innerHTML = history.prescriptions.map(p => `
 					<div class="prescription-card">
 						<div class="prescription-header">
-							<strong>Date:</strong> ${new Date(p.date).toLocaleString()}
-							<span style="margin-left: 16px;"><strong>Doctor:</strong> ${p.doctorName}</span>
+							<strong>Fecha:</strong> ${new Date(p.date).toLocaleString('es-CO')}
+							<span style="margin-left: 16px;"><strong>Médico:</strong> ${p.doctorName}</span>
 						</div>
 						<table class="table">
 							<thead>
 								<tr>
-									<th>Medication</th>
-									<th>Dose</th>
-									<th>Duration</th>
+									<th>Medicamento</th>
+									<th>Dosis</th>
+									<th>Duración</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -136,7 +136,7 @@ import Layout from '../layouts/Layout.astro';
 					</div>
 				`).join('');
 			} else {
-				prescriptionsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No prescriptions</p>';
+				prescriptionsDiv.innerHTML = '<p style="color: #666; text-align: center;">No hay prescripciones</p>';
 			}
 
 			const laboratoryDiv = document.getElementById('laboratoryList');
@@ -145,11 +145,11 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Test Type</th>
-								<th>Value</th>
-								<th>Reference Range</th>
-								<th>Status</th>
-								<th>Date</th>
+								<th>Tipo de Examen</th>
+								<th>Valor</th>
+								<th>Rango de Referencia</th>
+								<th>Estado</th>
+								<th>Fecha</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -162,17 +162,17 @@ import Layout from '../layouts/Layout.astro';
 									<td>${r.minValue} - ${r.maxValue} ${r.unit}</td>
 									<td>
 										<span class="status ${r.inRange ? 'status-completed' : 'status-cancelled'}">
-											${r.inRange ? 'Normal' : 'Out of range'}
+											${r.inRange ? 'Normal' : 'Fuera de rango'}
 										</span>
 									</td>
-									<td>${new Date(r.date).toLocaleDateString()}</td>
+									<td>${new Date(r.date).toLocaleDateString('es-CO')}</td>
 								</tr>
 							`).join('')}
 						</tbody>
 					</table>
 				`;
 			} else {
-				laboratoryDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No laboratory results</p>';
+				laboratoryDiv.innerHTML = '<p style="color: #666; text-align: center;">No hay resultados de laboratorio</p>';
 			}
 		} catch (error) {
 			console.error('Error loading history:', error);
@@ -184,7 +184,7 @@ import Layout from '../layouts/Layout.astro';
 		const tests = Array.from(checkboxes).map(cb => cb.value);
 
 		if (tests.length === 0) {
-			showLabMessage('Please select at least one test', 'error');
+			showLabMessage('Por favor seleccione al menos un examen', 'error');
 			return;
 		}
 
@@ -196,14 +196,14 @@ import Layout from '../layouts/Layout.astro';
 			});
 
 			if (response.ok) {
-				showLabMessage('Tests requested successfully', 'success');
+				showLabMessage('Exámenes solicitados exitosamente', 'success');
 				checkboxes.forEach(cb => cb.checked = false);
 				loadHistory();
 			} else {
-				showLabMessage('Error requesting tests', 'error');
+				showLabMessage('Error al solicitar los exámenes', 'error');
 			}
 		} catch (error) {
-			showLabMessage('Connection error', 'error');
+			showLabMessage('Error de conexión', 'error');
 		}
 	}
 
@@ -238,31 +238,35 @@ import Layout from '../layouts/Layout.astro';
 	.checkbox-group {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-		margin: 12px 0;
+		gap: 12px;
+		margin: 16px 0;
 	}
 	
 	.checkbox-group label {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 10px;
 		cursor: pointer;
+		font-size: 15px;
 	}
 	
 	.checkbox-group input[type="checkbox"] {
-		width: auto;
+		width: 20px;
+		height: 20px;
+		accent-color: #1e3a5f;
 	}
 	
 	.prescription-card {
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		padding: 16px;
-		margin-bottom: 16px;
+		border: 2px solid #e8e8e8;
+		border-radius: 12px;
+		padding: 20px;
+		margin-bottom: 20px;
 	}
 	
 	.prescription-header {
-		margin-bottom: 12px;
+		margin-bottom: 16px;
 		padding-bottom: 12px;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 2px solid #e8e8e8;
+		color: #333;
 	}
 </style>

@@ -2,64 +2,64 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Appointments - Medical Management System">
+<Layout title="Citas - Sistema de Gestión Médica">
 	<nav class="nav">
 		<div class="logo">
-			<h2 style="color: #667eea;">🏥 Health System</h2>
+			<h2 style="color: #1e3a5f;">🏥 Sistema de Salud</h2>
 		</div>
 		<div class="nav-links">
 			<a href="/dashboard">Dashboard</a>
-			<a href="/appointments" class="active">Appointments</a>
-			<a href="/history">Medical History</a>
-			<a href="#" onclick="logout()">Logout</a>
+			<a href="/appointments" class="active">Citas</a>
+			<a href="/history">Historia Clínica</a>
+			<a href="#" onclick="logout()">Cerrar Sesión</a>
 		</div>
 	</nav>
 
 	<div class="container">
-		<h1 style="margin-bottom: 24px; color: white;">Appointments Management</h1>
+		<h1 style="margin-bottom: 24px; color: white;">Gestión de Citas</h1>
 		
 		<div class="card" style="margin-bottom: 24px;">
-			<h2 style="margin-bottom: 16px;">Schedule New Appointment</h2>
+			<h2 style="margin-bottom: 16px; color: #1e3a5f;">Agendar Nueva Cita</h2>
 			<div class="form-grid">
 				<div class="form-group">
-					<label for="specialty">Specialty</label>
+					<label for="specialty">Especialidad</label>
 					<select id="specialty">
-						<option value="">Select specialty</option>
-						<option value="Cardiology">Cardiology</option>
-						<option value="General Medicine">General Medicine</option>
-						<option value="Pediatrics">Pediatrics</option>
-						<option value="Dermatology">Dermatology</option>
+						<option value="">Seleccionar especialidad</option>
+						<option value="Cardiology">Cardiología</option>
+						<option value="General Medicine">Medicina General</option>
+						<option value="Pediatrics">Pediatría</option>
+						<option value="Dermatology">Dermatología</option>
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="doctor">Doctor</label>
+					<label for="doctor">Médico</label>
 					<select id="doctor" disabled>
-						<option value="">Select doctor</option>
+						<option value="">Seleccione médico</option>
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="date">Date</label>
+					<label for="date">Fecha</label>
 					<input type="date" id="date" min="">
 				</div>
 				<div class="form-group">
-					<label for="time">Time</label>
+					<label for="time">Hora</label>
 					<select id="time" disabled>
-						<option value="">Select time</option>
+						<option value="">Seleccione horario</option>
 					</select>
 				</div>
 			</div>
-			<button class="btn btn-primary" onclick="scheduleAppointment()">Schedule Appointment</button>
+			<button class="btn btn-primary" onclick="scheduleAppointment()">Agendar Cita</button>
 			<div id="appointmentMessage" class="alert" style="display: none; margin-top: 16px;"></div>
 		</div>
 
 		<div class="card">
-			<h2 style="margin-bottom: 16px;">My Appointments</h2>
+			<h2 style="margin-bottom: 16px; color: #1e3a5f;">Mis Citas</h2>
 			<div class="tabs">
-				<button class="tab active" onclick="showAppointments('upcoming')">Upcoming</button>
-				<button class="tab" onclick="showAppointments('past')">Past</button>
+				<button class="tab active" onclick="showAppointments('upcoming')">Próximas</button>
+				<button class="tab" onclick="showAppointments('past')">Pasadas</button>
 			</div>
 			<div id="appointmentsList">
-				<p style="color: #6b7280;">Loading...</p>
+				<p style="color: #666; text-align: center;">Cargando...</p>
 			</div>
 		</div>
 	</div>
@@ -84,8 +84,8 @@ import Layout from '../layouts/Layout.astro';
 		const doctorSelect = document.getElementById('doctor');
 		const timeSelect = document.getElementById('time');
 		
-		doctorSelect.innerHTML = '<option value="">Loading...</option>';
-		timeSelect.innerHTML = '<option value="">Select time</option>';
+		doctorSelect.innerHTML = '<option value="">Cargando...</option>';
+		timeSelect.innerHTML = '<option value="">Seleccione horario</option>';
 		timeSelect.disabled = true;
 
 		if (specialty) {
@@ -93,7 +93,7 @@ import Layout from '../layouts/Layout.astro';
 				const response = await fetch(`${API_URL}/medicos?specialty=${specialty}`);
 				doctors = await response.json();
 				
-				doctorSelect.innerHTML = '<option value="">Select doctor</option>';
+				doctorSelect.innerHTML = '<option value="">Seleccionar médico</option>';
 				doctors.forEach(doc => {
 					doctorSelect.innerHTML += `<option value="${doc.id}">${doc.name}</option>`;
 				});
@@ -102,7 +102,7 @@ import Layout from '../layouts/Layout.astro';
 				console.error('Error loading doctors:', error);
 			}
 		} else {
-			doctorSelect.innerHTML = '<option value="">Select doctor</option>';
+			doctorSelect.innerHTML = '<option value="">Seleccione médico</option>';
 			doctorSelect.disabled = true;
 		}
 	});
@@ -117,7 +117,7 @@ import Layout from '../layouts/Layout.astro';
 				const response = await fetch(`${API_URL}/horarios/${doctorId}?date=${date}T00:00:00`);
 				schedules = await response.json();
 				
-				timeSelect.innerHTML = '<option value="">Select time</option>';
+				timeSelect.innerHTML = '<option value="">Seleccionar horario</option>';
 				schedules.forEach(time => {
 					timeSelect.innerHTML += `<option value="${time}">${time}</option>`;
 				});
@@ -142,7 +142,7 @@ import Layout from '../layouts/Layout.astro';
 		const time = document.getElementById('time').value;
 
 		if (!specialty || !doctorId || !date || !time) {
-			showMessage('Please fill in all fields', 'error');
+			showMessage('Por favor complete todos los campos', 'error');
 			return;
 		}
 
@@ -161,19 +161,19 @@ import Layout from '../layouts/Layout.astro';
 			});
 
 			if (response.ok) {
-				showMessage('Appointment scheduled successfully', 'success');
+				showMessage('Cita agendada exitosamente', 'success');
 				loadAppointments();
 				document.getElementById('specialty').value = '';
-				document.getElementById('doctor').innerHTML = '<option value="">Select doctor</option>';
+				document.getElementById('doctor').innerHTML = '<option value="">Seleccione médico</option>';
 				document.getElementById('doctor').disabled = true;
 				document.getElementById('date').value = '';
-				document.getElementById('time').innerHTML = '<option value="">Select time</option>';
+				document.getElementById('time').innerHTML = '<option value="">Seleccione horario</option>';
 				document.getElementById('time').disabled = true;
 			} else {
-				showMessage('Error scheduling appointment', 'error');
+				showMessage('Error al agendar la cita', 'error');
 			}
 		} catch (error) {
-			showMessage('Connection error', 'error');
+			showMessage('Error de conexión', 'error');
 		}
 	}
 
@@ -204,22 +204,22 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Date</th>
-								<th>Doctor</th>
-								<th>Specialty</th>
-								<th>Status</th>
-								<th>Action</th>
+								<th>Fecha</th>
+								<th>Médico</th>
+								<th>Especialidad</th>
+								<th>Estado</th>
+								<th>Acción</th>
 							</tr>
 						</thead>
 						<tbody>
 							${appointments.map(apt => `
 								<tr>
-									<td>${new Date(apt.dateTime).toLocaleString()}</td>
+									<td>${new Date(apt.dateTime).toLocaleString('es-CO')}</td>
 									<td>${apt.doctorName}</td>
 									<td>${apt.specialty}</td>
 									<td><span class="status status-${apt.status.toLowerCase()}">${apt.status}</span></td>
 									<td>
-										${apt.status === 'Scheduled' ? `<button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')">Cancel</button>` : ''}
+										${apt.status === 'Scheduled' ? `<button class="btn btn-danger" style="padding: 8px 16px;" onclick="cancelAppointment('${apt.id}')">Cancelar</button>` : ''}
 									</td>
 								</tr>
 							`).join('')}
@@ -227,7 +227,7 @@ import Layout from '../layouts/Layout.astro';
 					</table>
 				`;
 			} else {
-				div.innerHTML = '<p style="color: #6b7280; text-align: center;">No appointments</p>';
+				div.innerHTML = '<p style="color: #666; text-align: center;">No hay citas</p>';
 			}
 		} catch (error) {
 			console.error('Error loading appointments:', error);
@@ -235,7 +235,7 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 	async function cancelAppointment(appointmentId) {
-		if (!confirm('Are you sure you want to cancel this appointment?')) return;
+		if (!confirm('¿Está seguro de cancelar esta cita?')) return;
 		
 		try {
 			await fetch(`${API_URL}/cita/${appointmentId}`, { method: 'DELETE' });
