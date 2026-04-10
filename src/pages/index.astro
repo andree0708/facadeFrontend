@@ -1,60 +1,61 @@
 ---
 import Layout from '../layouts/Layout.astro';
-const API_URL = import.meta.env.PUBLIC_API_URL || 'https://facadebackend.onrender.com';
 ---
 
-<Layout title="Sistema de Gestión Médica">
+<Layout title="Medical Management System">
 	<div class="container">
 		<div class="auth-container">
 			<div class="auth-tabs">
-				<button class="tab active" id="loginTab">Iniciar Sesión</button>
-				<button class="tab" id="registerTab">Registrarse</button>
+				<button class="tab active" id="loginTab">Login</button>
+				<button class="tab" id="registerTab">Register</button>
 			</div>
 			
 			<div id="loginForm" class="auth-form">
 				<div class="form-group">
-					<label for="loginDocument">Número de Documento</label>
-					<input type="text" id="loginDocument" placeholder="Ingrese su documento">
+					<label for="loginDocument">Document Number</label>
+					<input type="text" id="loginDocument" placeholder="Enter your document number">
 				</div>
-				<button class="btn btn-primary" onclick="handleLogin()">Ingresar</button>
+				<button class="btn btn-primary" onclick="handleLogin()">Sign In</button>
 			</div>
 			
 			<div id="registerForm" class="auth-form" style="display: none;">
 				<div class="form-group">
-					<label for="regName">Nombre Completo</label>
-					<input type="text" id="regName" placeholder="Ingrese su nombre">
+					<label for="regName">Full Name</label>
+					<input type="text" id="regName" placeholder="Enter your name">
 				</div>
 				<div class="form-group">
-					<label for="regDocument">Número de Documento</label>
-					<input type="text" id="regDocument" placeholder="Ingrese su documento">
+					<label for="regDocument">Document Number</label>
+					<input type="text" id="regDocument" placeholder="Enter your document number">
 				</div>
 				<div class="form-group">
-					<label for="regEmail">Correo Electrónico</label>
-					<input type="email" id="regEmail" placeholder="Ingrese su correo">
+					<label for="regEmail">Email</label>
+					<input type="email" id="regEmail" placeholder="Enter your email">
 				</div>
 				<div class="form-group">
-					<label for="regPhone">Teléfono</label>
-					<input type="tel" id="regPhone" placeholder="Ingrese su teléfono">
+					<label for="regPhone">Phone</label>
+					<input type="tel" id="regPhone" placeholder="Enter your phone">
 				</div>
 				<div class="form-group">
-					<label for="regBirthDate">Fecha de Nacimiento</label>
+					<label for="regBirthDate">Birth Date</label>
 					<input type="date" id="regBirthDate">
 				</div>
 				<div class="form-group">
-					<label for="regAllergies">Alergias (opcional)</label>
-					<input type="text" id="regAllergies" placeholder="Liste sus alergias si las tiene">
+					<label for="regAllergies">Allergies (optional)</label>
+					<input type="text" id="regAllergies" placeholder="List your allergies if any">
 				</div>
-				<button class="btn btn-primary" onclick="handleRegister()">Registrarse</button>
+				<button class="btn btn-primary" onclick="handleRegister()">Register</button>
 			</div>
 			
 			<div id="authMessage" class="alert" style="display: none;"></div>
+			<div id="loadingSpinner" style="display: none; text-align: center; margin-top: 10px;">
+				<span>Loading...</span>
+			</div>
 		</div>
 	</div>
 </Layout>
 
 <script is:inline>
-	const API_URL = "https://facadebackend.onrender.com";
-	let currentPatientId = null;
+	const API_URL = "https://facadebackend.onrender.com/api/clinica";
 
 	document.getElementById('loginTab').addEventListener('click', () => showAuthForm('login'));
 	document.getElementById('registerTab').addEventListener('click', () => showAuthForm('register'));
@@ -75,28 +76,38 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'https://facadebackend.onrende
 		const allergies = document.getElementById('regAllergies').value;
 
 		if (!name || !document || !email || !phone || !birthDate) {
-			showMessage('Por favor complete todos los campos requeridos', 'error');
+			showMessage('Please fill in all required fields', 'error');
 			return;
 		}
 
+		showLoading(true);
+
 		try {
-			const response = await fetch(`${API_URL}/api/clinica/paciente`, {
+			console.log('Registering to:', `${API_URL}/paciente`);
+			const response = await fetch(`${API_URL}/paciente`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name, document, email, phone, birthDate, allergies })
 			});
 
+			console.log('Response status:', response.status);
+			
 			if (response.ok) {
 				const patient = await response.json();
-				currentPatientId = patient.id;
+				console.log('Patient registered:', patient);
 				localStorage.setItem('patientId', patient.id);
 				localStorage.setItem('patientName', patient.name);
 				window.location.href = '/dashboard';
 			} else {
-				showMessage('Error al registrar. Documento puede estar duplicado.', 'error');
+				const errorText = await response.text();
+				console.error('Error response:', errorText);
+				showMessage('Registration failed. Document may already be registered.', 'error');
 			}
 		} catch (error) {
-			showMessage('Error de conexión', 'error');
+			console.error('Connection error:', error);
+			showMessage('Connection error. Please try again.', 'error');
+		} finally {
+			showLoading(false);
 		}
 	}
 
@@ -104,24 +115,32 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'https://facadebackend.onrende
 		const document = document.getElementById('loginDocument').value;
 		
 		if (!document) {
-			showMessage('Por favor ingrese su documento', 'error');
+			showMessage('Please enter your document number', 'error');
 			return;
 		}
 
+		showLoading(true);
+
 		try {
-			const patients = await fetch(`${API_URL}/api/clinica/paciente`).then(r => r.json());
+			console.log('Logging in, fetching patients from:', `${API_URL}/paciente`);
+			const response = await fetch(`${API_URL}/paciente`);
+			const patients = await response.json();
+			console.log('Patients fetched:', patients);
+			
 			const patient = patients.find(p => p.document === document);
 			
 			if (patient) {
-				currentPatientId = patient.id;
 				localStorage.setItem('patientId', patient.id);
 				localStorage.setItem('patientName', patient.name);
 				window.location.href = '/dashboard';
 			} else {
-				showMessage('Paciente no encontrado. Regístrese primero.', 'error');
+				showMessage('Patient not found. Please register first.', 'error');
 			}
 		} catch (error) {
-			showMessage('Error de conexión', 'error');
+			console.error('Connection error:', error);
+			showMessage('Connection error. Please try again.', 'error');
+		} finally {
+			showLoading(false);
 		}
 	}
 
@@ -131,6 +150,10 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'https://facadebackend.onrende
 		msgDiv.className = `alert alert-${type}`;
 		msgDiv.style.display = 'block';
 		setTimeout(() => msgDiv.style.display = 'none', 5000);
+	}
+
+	function showLoading(show) {
+		document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
 	}
 </script>
 

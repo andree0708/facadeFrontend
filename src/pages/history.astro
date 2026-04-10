@@ -2,62 +2,62 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Historia Clínica - Sistema de Gestión Médica">
+<Layout title="Medical History - Medical Management System">
 	<nav class="nav">
 		<div class="logo">
-			<h2 style="color: #667eea;">🏥 Sistema de Salud</h2>
+			<h2 style="color: #667eea;">🏥 Health System</h2>
 		</div>
 		<div class="nav-links">
 			<a href="/dashboard">Dashboard</a>
-			<a href="/appointments">Citas</a>
-			<a href="/history" class="active">Historia Clínica</a>
-			<a href="#" onclick="logout()">Cerrar Sesión</a>
+			<a href="/appointments">Appointments</a>
+			<a href="/history" class="active">Medical History</a>
+			<a href="#" onclick="logout()">Logout</a>
 		</div>
 	</nav>
 
 	<div class="container">
-		<h1 style="margin-bottom: 24px; color: white;">Historia Clínica Completa</h1>
+		<h1 style="margin-bottom: 24px; color: white;">Complete Medical History</h1>
 		
 		<div class="card">
 			<div class="tabs">
-				<button class="tab active" onclick="showTab('consultations')">Consultas</button>
-				<button class="tab" onclick="showTab('prescriptions')">Prescripciones</button>
-				<button class="tab" onclick="showTab('laboratory')">Laboratorio</button>
-				<button class="tab" onclick="showTab('new-lab')">Solicitar Exámenes</button>
+				<button class="tab active" onclick="showTab('consultations')">Consultations</button>
+				<button class="tab" onclick="showTab('prescriptions')">Prescriptions</button>
+				<button class="tab" onclick="showTab('laboratory')">Laboratory</button>
+				<button class="tab" onclick="showTab('new-lab')">Request Tests</button>
 			</div>
 
 			<div id="consultationsTab">
-				<h3 style="margin: 16px 0;">Historial de Consultas</h3>
+				<h3 style="margin: 16px 0;">Consultation History</h3>
 				<div id="consultationsList">
-					<p style="color: #6b7280;">Cargando...</p>
+					<p style="color: #6b7280;">Loading...</p>
 				</div>
 			</div>
 
 			<div id="prescriptionsTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Prescripciones Médicas</h3>
+				<h3 style="margin: 16px 0;">Medical Prescriptions</h3>
 				<div id="prescriptionsList">
-					<p style="color: #6b7280;">Cargando...</p>
+					<p style="color: #6b7280;">Loading...</p>
 				</div>
 			</div>
 
 			<div id="laboratoryTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Resultados de Laboratorio</h3>
+				<h3 style="margin: 16px 0;">Laboratory Results</h3>
 				<div id="laboratoryList">
-					<p style="color: #6b7280;">Cargando...</p>
+					<p style="color: #6b7280;">Loading...</p>
 				</div>
 			</div>
 
 			<div id="newLabTab" style="display: none;">
-				<h3 style="margin: 16px 0;">Solicitar Exámenes de Laboratorio</h3>
+				<h3 style="margin: 16px 0;">Request Laboratory Tests</h3>
 				<div class="form-group">
-					<label>Seleccionar Exámenes:</label>
+					<label>Select Tests:</label>
 					<div class="checkbox-group">
-						<label><input type="checkbox" value="hemograma"> Hemograma</label>
-						<label><input type="checkbox" value="glicemia"> Glicemia</label>
-						<label><input type="checkbox" value="perfil lipídico"> Perfil Lipídico</label>
+						<label><input type="checkbox" value="hemograma"> Hemogram</label>
+						<label><input type="checkbox" value="glicemia"> Blood Glucose</label>
+						<label><input type="checkbox" value="perfil lipídico"> Lipid Profile</label>
 					</div>
 				</div>
-				<button class="btn btn-primary" onclick="requestLabTests()">Solicitar Exámenes</button>
+				<button class="btn btn-primary" onclick="requestLabTests()">Request Tests</button>
 				<div id="labRequestMessage" class="alert" style="display: none; margin-top: 16px;"></div>
 			</div>
 		</div>
@@ -83,17 +83,17 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Fecha</th>
-								<th>Médico</th>
-								<th>Especialidad</th>
-								<th>Diagnóstico</th>
-								<th>Motivo</th>
+								<th>Date</th>
+								<th>Doctor</th>
+								<th>Specialty</th>
+								<th>Diagnosis</th>
+								<th>Reason</th>
 							</tr>
 						</thead>
 						<tbody>
 							${history.consultations.map(c => `
 								<tr>
-									<td>${new Date(c.date).toLocaleString('es-CO')}</td>
+									<td>${new Date(c.date).toLocaleString()}</td>
 									<td>${c.doctorName}</td>
 									<td>${c.specialty}</td>
 									<td>${c.diagnosis}</td>
@@ -104,7 +104,7 @@ import Layout from '../layouts/Layout.astro';
 					</table>
 				`;
 			} else {
-				consultationsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay consultas registradas</p>';
+				consultationsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No consultations recorded</p>';
 			}
 
 			const prescriptionsDiv = document.getElementById('prescriptionsList');
@@ -112,15 +112,15 @@ import Layout from '../layouts/Layout.astro';
 				prescriptionsDiv.innerHTML = history.prescriptions.map(p => `
 					<div class="prescription-card">
 						<div class="prescription-header">
-							<strong>Fecha:</strong> ${new Date(p.date).toLocaleString('es-CO')}
-							<span style="margin-left: 16px;"><strong>Médico:</strong> ${p.doctorName}</span>
+							<strong>Date:</strong> ${new Date(p.date).toLocaleString()}
+							<span style="margin-left: 16px;"><strong>Doctor:</strong> ${p.doctorName}</span>
 						</div>
 						<table class="table">
 							<thead>
 								<tr>
-									<th>Medicamento</th>
-									<th>Dosis</th>
-									<th>Duración</th>
+									<th>Medication</th>
+									<th>Dose</th>
+									<th>Duration</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -136,7 +136,7 @@ import Layout from '../layouts/Layout.astro';
 					</div>
 				`).join('');
 			} else {
-				prescriptionsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay prescripciones</p>';
+				prescriptionsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No prescriptions</p>';
 			}
 
 			const laboratoryDiv = document.getElementById('laboratoryList');
@@ -145,11 +145,11 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Tipo de Examen</th>
-								<th>Valor</th>
-								<th>Rango de Referencia</th>
-								<th>Estado</th>
-								<th>Fecha</th>
+								<th>Test Type</th>
+								<th>Value</th>
+								<th>Reference Range</th>
+								<th>Status</th>
+								<th>Date</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -162,17 +162,17 @@ import Layout from '../layouts/Layout.astro';
 									<td>${r.minValue} - ${r.maxValue} ${r.unit}</td>
 									<td>
 										<span class="status ${r.inRange ? 'status-completed' : 'status-cancelled'}">
-											${r.inRange ? 'Normal' : 'Fuera de rango'}
+											${r.inRange ? 'Normal' : 'Out of range'}
 										</span>
 									</td>
-									<td>${new Date(r.date).toLocaleDateString('es-CO')}</td>
+									<td>${new Date(r.date).toLocaleDateString()}</td>
 								</tr>
 							`).join('')}
 						</tbody>
 					</table>
 				`;
 			} else {
-				laboratoryDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay resultados de laboratorio</p>';
+				laboratoryDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No laboratory results</p>';
 			}
 		} catch (error) {
 			console.error('Error loading history:', error);
@@ -184,7 +184,7 @@ import Layout from '../layouts/Layout.astro';
 		const tests = Array.from(checkboxes).map(cb => cb.value);
 
 		if (tests.length === 0) {
-			showLabMessage('Por favor seleccione al menos un examen', 'error');
+			showLabMessage('Please select at least one test', 'error');
 			return;
 		}
 
@@ -196,14 +196,14 @@ import Layout from '../layouts/Layout.astro';
 			});
 
 			if (response.ok) {
-				showLabMessage('Exámenes solicitados exitosamente', 'success');
+				showLabMessage('Tests requested successfully', 'success');
 				checkboxes.forEach(cb => cb.checked = false);
 				loadHistory();
 			} else {
-				showLabMessage('Error al solicitar los exámenes', 'error');
+				showLabMessage('Error requesting tests', 'error');
 			}
 		} catch (error) {
-			showLabMessage('Error de conexión', 'error');
+			showLabMessage('Connection error', 'error');
 		}
 	}
 

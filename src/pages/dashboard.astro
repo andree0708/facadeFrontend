@@ -2,19 +2,19 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Dashboard - Sistema de Gestión Médica">
+<Layout title="Dashboard - Medical Management System">
 	<nav class="nav">
 		<div class="logo">
-			<h2 style="color: #667eea;">🏥 Sistema de Salud</h2>
+			<h2 style="color: #667eea;">🏥 Health System</h2>
 		</div>
 		<div class="nav-links">
 			<a href="/dashboard" class="active">Dashboard</a>
-			<a href="/appointments">Citas</a>
-			<a href="/history">Historia Clínica</a>
-			<a href="#" onclick="logout()">Cerrar Sesión</a>
+			<a href="/appointments">Appointments</a>
+			<a href="/history">Medical History</a>
+			<a href="#" onclick="logout()">Logout</a>
 		</div>
 		<div class="user-info">
-			<span id="patientName">Bienvenido</span>
+			<span id="patientName">Welcome</span>
 		</div>
 	</nav>
 
@@ -24,32 +24,32 @@ import Layout from '../layouts/Layout.astro';
 		<div class="grid">
 			<div class="stat-card">
 				<div class="stat-number" id="nextAppointmentCount">0</div>
-				<div class="stat-label">Próximas Citas</div>
+				<div class="stat-label">Upcoming Appointments</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-number" id="recentResultsCount">0</div>
-				<div class="stat-label">Resultados Recientes</div>
+				<div class="stat-label">Recent Results</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-number" id="recentPrescriptionsCount">0</div>
-				<div class="stat-label">Prescripciones Recientes</div>
+				<div class="stat-label">Recent Prescriptions</div>
 			</div>
 		</div>
 
 		<div class="section" style="margin-top: 32px;">
-			<h2 style="margin-bottom: 16px; color: white;">Próximas Citas</h2>
+			<h2 style="margin-bottom: 16px; color: white;">Upcoming Appointments</h2>
 			<div class="card">
 				<div id="upcomingAppointments">
-					<p style="color: #6b7280;">Cargando...</p>
+					<p style="color: #6b7280;">Loading...</p>
 				</div>
 			</div>
 		</div>
 
 		<div class="section" style="margin-top: 32px;">
-			<h2 style="margin-bottom: 16px; color: white;">Últimos Resultados de Laboratorio</h2>
+			<h2 style="margin-bottom: 16px; color: white;">Recent Lab Results</h2>
 			<div class="card">
 				<div id="recentLabResults">
-					<p style="color: #6b7280;">Cargando...</p>
+					<p style="color: #6b7280;">Loading...</p>
 				</div>
 			</div>
 		</div>
@@ -65,7 +65,7 @@ import Layout from '../layouts/Layout.astro';
 		window.location.href = '/';
 	}
 
-	document.getElementById('patientName').textContent = patientName || 'Paciente';
+	document.getElementById('patientName').textContent = patientName || 'Patient';
 
 	async function loadDashboard() {
 		try {
@@ -89,16 +89,16 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Fecha</th>
-								<th>Médico</th>
-								<th>Especialidad</th>
-								<th>Estado</th>
+								<th>Date</th>
+								<th>Doctor</th>
+								<th>Specialty</th>
+								<th>Status</th>
 							</tr>
 						</thead>
 						<tbody>
 							${appointments.map(apt => `
 								<tr>
-									<td>${new Date(apt.dateTime).toLocaleString('es-CO')}</td>
+									<td>${new Date(apt.dateTime).toLocaleString()}</td>
 									<td>${apt.doctorName}</td>
 									<td>${apt.specialty}</td>
 									<td><span class="status status-scheduled">${apt.status}</span></td>
@@ -108,7 +108,7 @@ import Layout from '../layouts/Layout.astro';
 					</table>
 				`;
 			} else {
-				appointmentsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay citas próximas</p>';
+				appointmentsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No upcoming appointments</p>';
 			}
 
 			const resultsDiv = document.getElementById('recentLabResults');
@@ -117,10 +117,10 @@ import Layout from '../layouts/Layout.astro';
 					<table class="table">
 						<thead>
 							<tr>
-								<th>Examen</th>
-								<th>Valor</th>
-								<th>Rango</th>
-								<th>Fecha</th>
+								<th>Test</th>
+								<th>Value</th>
+								<th>Range</th>
+								<th>Date</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -129,14 +129,14 @@ import Layout from '../layouts/Layout.astro';
 									<td>${r.testType}</td>
 									<td class="${r.inRange ? 'in-range' : 'out-range'}">${r.value.toFixed(2)} ${r.unit}</td>
 									<td>${r.minValue} - ${r.maxValue} ${r.unit}</td>
-									<td>${new Date(r.date).toLocaleDateString('es-CO')}</td>
+									<td>${new Date(r.date).toLocaleDateString()}</td>
 								</tr>
 							`).join('')}
 						</tbody>
 					</table>
 				`;
 			} else {
-				resultsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay resultados recientes</p>';
+				resultsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No recent results</p>';
 			}
 		} catch (error) {
 			console.error('Error loading dashboard:', error);
