@@ -12,8 +12,8 @@ import Layout from '../layouts/Layout.astro';
 			
 			<div id="loginForm" class="auth-form">
 				<div class="form-group">
-					<label for="loginDocument">Document Number</label>
-					<input type="text" id="loginDocument" placeholder="Enter your document number">
+					<label for="loginDoc">Document Number</label>
+					<input type="text" id="loginDoc" placeholder="Enter your document number">
 				</div>
 				<button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Sign In</button>
 			</div>
@@ -24,8 +24,8 @@ import Layout from '../layouts/Layout.astro';
 					<input type="text" id="regName" placeholder="Enter your name">
 				</div>
 				<div class="form-group">
-					<label for="regDocument">Document Number</label>
-					<input type="text" id="regDocument" placeholder="Enter your document number">
+					<label for="regDoc">Document Number</label>
+					<input type="text" id="regDoc" placeholder="Enter your document number">
 				</div>
 				<div class="form-group">
 					<label for="regEmail">Email</label>
@@ -67,13 +67,13 @@ import Layout from '../layouts/Layout.astro';
 
 	async function handleRegister() {
 		const name = document.getElementById('regName').value.trim();
-		const document = document.getElementById('regDocument').value.trim();
+		const docNumber = document.getElementById('regDoc').value.trim();
 		const email = document.getElementById('regEmail').value.trim();
 		const phone = document.getElementById('regPhone').value.trim();
 		const birthDate = document.getElementById('regBirthDate').value;
 		const allergies = document.getElementById('regAllergies').value.trim();
 
-		if (!name || !document || !email || !phone || !birthDate) {
+		if (!name || !docNumber || !email || !phone || !birthDate) {
 			showMessage('Please fill in all required fields', 'error');
 			return;
 		}
@@ -86,7 +86,7 @@ import Layout from '../layouts/Layout.astro';
 			const response = await fetch(`${API_URL}/paciente`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name, document, email, phone, birthDate, allergies })
+				body: JSON.stringify({ name: name, document: docNumber, email: email, phone: phone, birthDate: birthDate, allergies: allergies })
 			});
 
 			if (response.ok) {
@@ -108,9 +108,9 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 	async function handleLogin() {
-		const document = document.getElementById('loginDocument').value.trim();
+		const docNumber = document.getElementById('loginDoc').value.trim();
 		
-		if (!document) {
+		if (!docNumber) {
 			showMessage('Please enter your document number', 'error');
 			return;
 		}
@@ -123,7 +123,7 @@ import Layout from '../layouts/Layout.astro';
 			const response = await fetch(`${API_URL}/paciente`);
 			const patients = await response.json();
 			
-			const patient = patients.find(p => p.document === document);
+			const patient = patients.find(p => p.document === docNumber);
 			
 			if (patient) {
 				localStorage.setItem('patientId', patient.id);
