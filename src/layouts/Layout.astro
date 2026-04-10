@@ -1,0 +1,242 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Sistema de Gestión Médica" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+	
+	body {
+		font-family: 'Inter', sans-serif;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		min-height: 100vh;
+		color: #333;
+	}
+	
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+	
+	.card {
+		background: white;
+		border-radius: 12px;
+		padding: 24px;
+		box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+	}
+	
+	.btn {
+		padding: 12px 24px;
+		border-radius: 8px;
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		transition: all 0.3s;
+	}
+	
+	.btn-primary {
+		background: #667eea;
+		color: white;
+	}
+	
+	.btn-primary:hover {
+		background: #5568d3;
+		transform: translateY(-2px);
+	}
+	
+	.btn-secondary {
+		background: #e0e7ff;
+		color: #667eea;
+	}
+	
+	.btn-danger {
+		background: #fee2e2;
+		color: #dc2626;
+	}
+	
+	input, select {
+		width: 100%;
+		padding: 12px;
+		border: 2px solid #e5e7eb;
+		border-radius: 8px;
+		font-size: 14px;
+		transition: border-color 0.3s;
+	}
+	
+	input:focus, select:focus {
+		outline: none;
+		border-color: #667eea;
+	}
+	
+	.form-group {
+		margin-bottom: 16px;
+	}
+	
+	.form-group label {
+		display: block;
+		margin-bottom: 6px;
+		font-weight: 500;
+		color: #374151;
+	}
+	
+	.nav {
+		background: white;
+		padding: 16px 24px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+	}
+	
+	.nav-links {
+		display: flex;
+		gap: 20px;
+	}
+	
+	.nav-links a {
+		text-decoration: none;
+		color: #6b7280;
+		font-weight: 500;
+		padding: 8px 16px;
+		border-radius: 6px;
+		transition: all 0.3s;
+	}
+	
+	.nav-links a:hover, .nav-links a.active {
+		background: #e0e7ff;
+		color: #667eea;
+	}
+	
+	.tabs {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 24px;
+		border-bottom: 2px solid #e5e7eb;
+	}
+	
+	.tab {
+		padding: 12px 24px;
+		cursor: pointer;
+		border: none;
+		background: none;
+		font-weight: 500;
+		color: #6b7280;
+		border-bottom: 2px solid transparent;
+		margin-bottom: -2px;
+	}
+	
+	.tab.active {
+		color: #667eea;
+		border-bottom-color: #667eea;
+	}
+	
+	.table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	
+	.table th, .table td {
+		padding: 12px;
+		text-align: left;
+		border-bottom: 1px solid #e5e7eb;
+	}
+	
+	.table th {
+		background: #f9fafb;
+		font-weight: 600;
+		color: #374151;
+	}
+	
+	.status {
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 12px;
+		font-weight: 500;
+	}
+	
+	.status-scheduled {
+		background: #dbeafe;
+		color: #1d4ed8;
+	}
+	
+	.status-completed {
+		background: #d1fae5;
+		color: #059669;
+	}
+	
+	.status-cancelled {
+		background: #fee2e2;
+		color: #dc2626;
+	}
+	
+	.in-range {
+		color: #059669;
+	}
+	
+	.out-range {
+		color: #dc2626;
+	}
+	
+	.alert {
+		padding: 16px;
+		border-radius: 8px;
+		margin-bottom: 16px;
+	}
+	
+	.alert-error {
+		background: #fee2e2;
+		color: #dc2626;
+	}
+	
+	.alert-success {
+		background: #d1fae5;
+		color: #059669;
+	}
+	
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 24px;
+	}
+	
+	.stat-card {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		padding: 24px;
+		border-radius: 12px;
+	}
+	
+	.stat-number {
+		font-size: 32px;
+		font-weight: 700;
+	}
+	
+	.stat-label {
+		opacity: 0.9;
+		margin-top: 4px;
+	}
+</style>

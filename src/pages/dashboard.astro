@@ -1,0 +1,168 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Dashboard - Sistema de Gestión Médica">
+	<nav class="nav">
+		<div class="logo">
+			<h2 style="color: #667eea;">🏥 Sistema de Salud</h2>
+		</div>
+		<div class="nav-links">
+			<a href="/dashboard" class="active">Dashboard</a>
+			<a href="/appointments">Citas</a>
+			<a href="/history">Historia Clínica</a>
+			<a href="#" onclick="logout()">Cerrar Sesión</a>
+		</div>
+		<div class="user-info">
+			<span id="patientName">Bienvenido</span>
+		</div>
+	</nav>
+
+	<div class="container">
+		<h1 style="margin-bottom: 24px; color: white;">Dashboard</h1>
+		
+		<div class="grid">
+			<div class="stat-card">
+				<div class="stat-number" id="nextAppointmentCount">0</div>
+				<div class="stat-label">Próximas Citas</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-number" id="recentResultsCount">0</div>
+				<div class="stat-label">Resultados Recientes</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-number" id="recentPrescriptionsCount">0</div>
+				<div class="stat-label">Prescripciones Recientes</div>
+			</div>
+		</div>
+
+		<div class="section" style="margin-top: 32px;">
+			<h2 style="margin-bottom: 16px; color: white;">Próximas Citas</h2>
+			<div class="card">
+				<div id="upcomingAppointments">
+					<p style="color: #6b7280;">Cargando...</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="section" style="margin-top: 32px;">
+			<h2 style="margin-bottom: 16px; color: white;">Últimos Resultados de Laboratorio</h2>
+			<div class="card">
+				<div id="recentLabResults">
+					<p style="color: #6b7280;">Cargando...</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<script is:inline>
+	const API_URL = 'https://clinica-backend-production.up.railway.app/api/clinica';
+	const patientId = localStorage.getItem('patientId');
+	const patientName = localStorage.getItem('patientName');
+
+	if (!patientId) {
+		window.location.href = '/';
+	}
+
+	document.getElementById('patientName').textContent = patientName || 'Paciente';
+
+	async function loadDashboard() {
+		try {
+			const [appointmentsRes, resultsRes, prescriptionsRes] = await Promise.all([
+				fetch(`${API_URL}/citas/proximas/${patientId}`),
+				fetch(`${API_URL}/laboratorio/recientes/${patientId}`),
+				fetch(`${API_URL}/prescripciones/recientes/${patientId}`)
+			]);
+
+			const appointments = await appointmentsRes.json();
+			const results = await resultsRes.json();
+			const prescriptions = await prescriptionsRes.json();
+
+			document.getElementById('nextAppointmentCount').textContent = appointments.length;
+			document.getElementById('recentResultsCount').textContent = results.length;
+			document.getElementById('recentPrescriptionsCount').textContent = prescriptions.length;
+
+			const appointmentsDiv = document.getElementById('upcomingAppointments');
+			if (appointments.length > 0) {
+				appointmentsDiv.innerHTML = `
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Médico</th>
+								<th>Especialidad</th>
+								<th>Estado</th>
+							</tr>
+						</thead>
+						<tbody>
+							${appointments.map(apt => `
+								<tr>
+									<td>${new Date(apt.dateTime).toLocaleString('es-CO')}</td>
+									<td>${apt.doctorName}</td>
+									<td>${apt.specialty}</td>
+									<td><span class="status status-scheduled">${apt.status}</span></td>
+								</tr>
+							`).join('')}
+						</tbody>
+					</table>
+				`;
+			} else {
+				appointmentsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay citas próximas</p>';
+			}
+
+			const resultsDiv = document.getElementById('recentLabResults');
+			if (results.length > 0) {
+				resultsDiv.innerHTML = `
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Examen</th>
+								<th>Valor</th>
+								<th>Rango</th>
+								<th>Fecha</th>
+							</tr>
+						</thead>
+						<tbody>
+							${results.map(r => `
+								<tr>
+									<td>${r.testType}</td>
+									<td class="${r.inRange ? 'in-range' : 'out-range'}">${r.value.toFixed(2)} ${r.unit}</td>
+									<td>${r.minValue} - ${r.maxValue} ${r.unit}</td>
+									<td>${new Date(r.date).toLocaleDateString('es-CO')}</td>
+								</tr>
+							`).join('')}
+						</tbody>
+					</table>
+				`;
+			} else {
+				resultsDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay resultados recientes</p>';
+			}
+		} catch (error) {
+			console.error('Error loading dashboard:', error);
+		}
+	}
+
+	function logout() {
+		localStorage.removeItem('patientId');
+		localStorage.removeItem('patientName');
+		window.location.href = '/';
+	}
+
+	loadDashboard();
+</script>
+
+<style>
+	.logo h2 {
+		font-size: 20px;
+	}
+	
+	.user-info {
+		font-weight: 500;
+		color: #6b7280;
+	}
+	
+	.section h2 {
+		font-size: 20px;
+	}
+</style>

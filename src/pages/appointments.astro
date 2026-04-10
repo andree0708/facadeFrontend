@@ -1,0 +1,278 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Citas - Sistema de Gestión Médica">
+	<nav class="nav">
+		<div class="logo">
+			<h2 style="color: #667eea;">🏥 Sistema de Salud</h2>
+		</div>
+		<div class="nav-links">
+			<a href="/dashboard">Dashboard</a>
+			<a href="/appointments" class="active">Citas</a>
+			<a href="/history">Historia Clínica</a>
+			<a href="#" onclick="logout()">Cerrar Sesión</a>
+		</div>
+	</nav>
+
+	<div class="container">
+		<h1 style="margin-bottom: 24px; color: white;">Gestión de Citas</h1>
+		
+		<div class="card" style="margin-bottom: 24px;">
+			<h2 style="margin-bottom: 16px;">Agendar Nueva Cita</h2>
+			<div class="form-grid">
+				<div class="form-group">
+					<label for="specialty">Especialidad</label>
+					<select id="specialty">
+						<option value="">Seleccionar especialidad</option>
+						<option value="Cardiology">Cardiología</option>
+						<option value="General Medicine">Medicina General</option>
+						<option value="Pediatrics">Pediatría</option>
+						<option value="Dermatology">Dermatología</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="doctor">Médico</label>
+					<select id="doctor" disabled>
+						<option value="">Seleccione médico</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="date">Fecha</label>
+					<input type="date" id="date" min="">
+				</div>
+				<div class="form-group">
+					<label for="time">Hora</label>
+					<select id="time" disabled>
+						<option value="">Seleccione horario</option>
+					</select>
+				</div>
+			</div>
+			<button class="btn btn-primary" onclick="scheduleAppointment()">Agendar Cita</button>
+			<div id="appointmentMessage" class="alert" style="display: none; margin-top: 16px;"></div>
+		</div>
+
+		<div class="card">
+			<h2 style="margin-bottom: 16px;">Mis Citas</h2>
+			<div class="tabs">
+				<button class="tab active" onclick="showAppointments('upcoming')">Próximas</button>
+				<button class="tab" onclick="showAppointments('past')">Pasadas</button>
+			</div>
+			<div id="appointmentsList">
+				<p style="color: #6b7280;">Cargando...</p>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<script is:inline>
+	const API_URL = 'https://clinica-backend-production.up.railway.app/api/clinica';
+	const patientId = localStorage.getItem('patientId');
+
+	if (!patientId) {
+		window.location.href = '/';
+	}
+
+	const today = new Date().toISOString().split('T')[0];
+	document.getElementById('date').min = today;
+
+	let doctors = [];
+	let schedules = [];
+
+	document.getElementById('specialty').addEventListener('change', async (e) => {
+		const specialty = e.target.value;
+		const doctorSelect = document.getElementById('doctor');
+		const timeSelect = document.getElementById('time');
+		
+		doctorSelect.innerHTML = '<option value="">Cargando...</option>';
+		timeSelect.innerHTML = '<option value="">Seleccione horario</option>';
+		timeSelect.disabled = true;
+
+		if (specialty) {
+			try {
+				const response = await fetch(`${API_URL}/medicos?specialty=${specialty}`);
+				doctors = await response.json();
+				
+				doctorSelect.innerHTML = '<option value="">Seleccionar médico</option>';
+				doctors.forEach(doc => {
+					doctorSelect.innerHTML += `<option value="${doc.id}">${doc.name}</option>`;
+				});
+				doctorSelect.disabled = false;
+			} catch (error) {
+				console.error('Error loading doctors:', error);
+			}
+		} else {
+			doctorSelect.innerHTML = '<option value="">Seleccione médico</option>';
+			doctorSelect.disabled = true;
+		}
+	});
+
+	document.getElementById('doctor').addEventListener('change', async (e) => {
+		const doctorId = e.target.value;
+		const date = document.getElementById('date').value;
+		const timeSelect = document.getElementById('time');
+		
+		if (doctorId && date) {
+			try {
+				const response = await fetch(`${API_URL}/horarios/${doctorId}?date=${date}T00:00:00`);
+				schedules = await response.json();
+				
+				timeSelect.innerHTML = '<option value="">Seleccionar horario</option>';
+				schedules.forEach(time => {
+					timeSelect.innerHTML += `<option value="${time}">${time}</option>`;
+				});
+				timeSelect.disabled = false;
+			} catch (error) {
+				console.error('Error loading schedules:', error);
+			}
+		}
+	});
+
+	document.getElementById('date').addEventListener('change', (e) => {
+		const doctorId = document.getElementById('doctor').value;
+		if (doctorId) {
+			document.getElementById('doctor').dispatchEvent(new Event('change'));
+		}
+	});
+
+	async function scheduleAppointment() {
+		const specialty = document.getElementById('specialty').value;
+		const doctorId = document.getElementById('doctor').value;
+		const date = document.getElementById('date').value;
+		const time = document.getElementById('time').value;
+
+		if (!specialty || !doctorId || !date || !time) {
+			showMessage('Por favor complete todos los campos', 'error');
+			return;
+		}
+
+		const dateTime = `${date}T${time}:00`;
+
+		try {
+			const response = await fetch(`${API_URL}/cita`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					patientId,
+					specialty,
+					doctorId,
+					dateTime
+				})
+			});
+
+			if (response.ok) {
+				showMessage('Cita agendada exitosamente', 'success');
+				loadAppointments();
+				document.getElementById('specialty').value = '';
+				document.getElementById('doctor').innerHTML = '<option value="">Seleccione médico</option>';
+				document.getElementById('doctor').disabled = true;
+				document.getElementById('date').value = '';
+				document.getElementById('time').innerHTML = '<option value="">Seleccione horario</option>';
+				document.getElementById('time').disabled = true;
+			} else {
+				showMessage('Error al agendar la cita', 'error');
+			}
+		} catch (error) {
+			showMessage('Error de conexión', 'error');
+		}
+	}
+
+	function showMessage(message, type) {
+		const msgDiv = document.getElementById('appointmentMessage');
+		msgDiv.textContent = message;
+		msgDiv.className = `alert alert-${type}`;
+		msgDiv.style.display = 'block';
+		setTimeout(() => msgDiv.style.display = 'none', 5000);
+	}
+
+	let currentTab = 'upcoming';
+
+	async function loadAppointments() {
+		try {
+			const response = await fetch(`${API_URL}/historia/${patientId}`);
+			const history = await response.json();
+			
+			const now = new Date();
+			const appointments = currentTab === 'upcoming' 
+				? history.pastAppointments.filter(a => new Date(a.dateTime) > now && a.status === 'Scheduled')
+				: history.pastAppointments.filter(a => new Date(a.dateTime) <= now || a.status !== 'Scheduled');
+
+			const div = document.getElementById('appointmentsList');
+			
+			if (appointments.length > 0) {
+				div.innerHTML = `
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Médico</th>
+								<th>Especialidad</th>
+								<th>Estado</th>
+								<th>Acción</th>
+							</tr>
+						</thead>
+						<tbody>
+							${appointments.map(apt => `
+								<tr>
+									<td>${new Date(apt.dateTime).toLocaleString('es-CO')}</td>
+									<td>${apt.doctorName}</td>
+									<td>${apt.specialty}</td>
+									<td><span class="status status-${apt.status.toLowerCase()}">${apt.status}</span></td>
+									<td>
+										${apt.status === 'Scheduled' ? `<button class="btn btn-danger" onclick="cancelAppointment('${apt.id}')">Cancelar</button>` : ''}
+									</td>
+								</tr>
+							`).join('')}
+						</tbody>
+					</table>
+				`;
+			} else {
+				div.innerHTML = '<p style="color: #6b7280; text-align: center;">No hay citas</p>';
+			}
+		} catch (error) {
+			console.error('Error loading appointments:', error);
+		}
+	}
+
+	async function cancelAppointment(appointmentId) {
+		if (!confirm('¿Está seguro de cancelar esta cita?')) return;
+		
+		try {
+			await fetch(`${API_URL}/cita/${appointmentId}`, { method: 'DELETE' });
+			loadAppointments();
+		} catch (error) {
+			console.error('Error cancelling appointment:', error);
+		}
+	}
+
+	function showAppointments(tab) {
+		currentTab = tab;
+		document.querySelectorAll('.tab').forEach((t, i) => {
+			t.classList.toggle('active', (tab === 'upcoming' && i === 0) || (tab === 'past' && i === 1));
+		});
+		loadAppointments();
+	}
+
+	function logout() {
+		localStorage.removeItem('patientId');
+		localStorage.removeItem('patientName');
+		window.location.href = '/';
+	}
+
+	loadAppointments();
+</script>
+
+<style>
+	.form-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 16px;
+		margin-bottom: 16px;
+	}
+	
+	@media (max-width: 768px) {
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
