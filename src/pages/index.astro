@@ -15,7 +15,7 @@ import Layout from '../layouts/Layout.astro';
 					<label for="loginDocument">Document Number</label>
 					<input type="text" id="loginDocument" placeholder="Enter your document number">
 				</div>
-				<button class="btn btn-primary" onclick="handleLogin()">Sign In</button>
+				<button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Sign In</button>
 			</div>
 			
 			<div id="registerForm" class="auth-form" style="display: none;">
@@ -43,13 +43,10 @@ import Layout from '../layouts/Layout.astro';
 					<label for="regAllergies">Allergies (optional)</label>
 					<input type="text" id="regAllergies" placeholder="List your allergies if any">
 				</div>
-				<button class="btn btn-primary" onclick="handleRegister()">Register</button>
+				<button class="btn btn-primary" id="registerBtn" onclick="handleRegister()">Register</button>
 			</div>
 			
 			<div id="authMessage" class="alert" style="display: none;"></div>
-			<div id="loadingSpinner" style="display: none; text-align: center; margin-top: 10px;">
-				<span>Loading...</span>
-			</div>
 		</div>
 	</div>
 </Layout>
@@ -65,67 +62,66 @@ import Layout from '../layouts/Layout.astro';
 		document.getElementById('registerTab').classList.toggle('active', form === 'register');
 		document.getElementById('loginForm').style.display = form === 'login' ? 'block' : 'none';
 		document.getElementById('registerForm').style.display = form === 'register' ? 'block' : 'none';
+		hideMessage();
 	}
 
 	async function handleRegister() {
-		const name = document.getElementById('regName').value;
-		const document = document.getElementById('regDocument').value;
-		const email = document.getElementById('regEmail').value;
-		const phone = document.getElementById('regPhone').value;
+		const name = document.getElementById('regName').value.trim();
+		const document = document.getElementById('regDocument').value.trim();
+		const email = document.getElementById('regEmail').value.trim();
+		const phone = document.getElementById('regPhone').value.trim();
 		const birthDate = document.getElementById('regBirthDate').value;
-		const allergies = document.getElementById('regAllergies').value;
+		const allergies = document.getElementById('regAllergies').value.trim();
 
 		if (!name || !document || !email || !phone || !birthDate) {
 			showMessage('Please fill in all required fields', 'error');
 			return;
 		}
 
-		showLoading(true);
+		const registerBtn = document.getElementById('registerBtn');
+		registerBtn.disabled = true;
+		registerBtn.textContent = 'Registering...';
 
 		try {
-			console.log('Registering to:', `${API_URL}/paciente`);
 			const response = await fetch(`${API_URL}/paciente`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name, document, email, phone, birthDate, allergies })
 			});
 
-			console.log('Response status:', response.status);
-			
 			if (response.ok) {
 				const patient = await response.json();
-				console.log('Patient registered:', patient);
 				localStorage.setItem('patientId', patient.id);
 				localStorage.setItem('patientName', patient.name);
 				window.location.href = '/dashboard';
 			} else {
-				const errorText = await response.text();
-				console.error('Error response:', errorText);
-				showMessage('Registration failed. Document may already be registered.', 'error');
+				const errorData = await response.json().catch(() => ({ message: 'Registration failed' }));
+				showMessage(errorData.message || 'Registration failed. Document may already be registered.', 'error');
+				registerBtn.disabled = false;
+				registerBtn.textContent = 'Register';
 			}
 		} catch (error) {
-			console.error('Connection error:', error);
 			showMessage('Connection error. Please try again.', 'error');
-		} finally {
-			showLoading(false);
+			registerBtn.disabled = false;
+			registerBtn.textContent = 'Register';
 		}
 	}
 
 	async function handleLogin() {
-		const document = document.getElementById('loginDocument').value;
+		const document = document.getElementById('loginDocument').value.trim();
 		
 		if (!document) {
 			showMessage('Please enter your document number', 'error');
 			return;
 		}
 
-		showLoading(true);
+		const loginBtn = document.getElementById('loginBtn');
+		loginBtn.disabled = true;
+		loginBtn.textContent = 'Signing in...';
 
 		try {
-			console.log('Logging in, fetching patients from:', `${API_URL}/paciente`);
 			const response = await fetch(`${API_URL}/paciente`);
 			const patients = await response.json();
-			console.log('Patients fetched:', patients);
 			
 			const patient = patients.find(p => p.document === document);
 			
@@ -135,12 +131,13 @@ import Layout from '../layouts/Layout.astro';
 				window.location.href = '/dashboard';
 			} else {
 				showMessage('Patient not found. Please register first.', 'error');
+				loginBtn.disabled = false;
+				loginBtn.textContent = 'Sign In';
 			}
 		} catch (error) {
-			console.error('Connection error:', error);
 			showMessage('Connection error. Please try again.', 'error');
-		} finally {
-			showLoading(false);
+			loginBtn.disabled = false;
+			loginBtn.textContent = 'Sign In';
 		}
 	}
 
@@ -149,11 +146,10 @@ import Layout from '../layouts/Layout.astro';
 		msgDiv.textContent = message;
 		msgDiv.className = `alert alert-${type}`;
 		msgDiv.style.display = 'block';
-		setTimeout(() => msgDiv.style.display = 'none', 5000);
 	}
 
-	function showLoading(show) {
-		document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+	function hideMessage() {
+		document.getElementById('authMessage').style.display = 'none';
 	}
 </script>
 
@@ -199,5 +195,10 @@ import Layout from '../layouts/Layout.astro';
 	.auth-form .btn {
 		width: 100%;
 		margin-top: 16px;
+	}
+
+	.auth-form .btn:disabled {
+		background: #ccc;
+		cursor: not-allowed;
 	}
 </style>
