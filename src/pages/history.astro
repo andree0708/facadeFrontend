@@ -218,7 +218,10 @@ import Layout from '../layouts/Layout.astro';
 	function showTab(tabName) {
 		const tabs = ['consultations', 'prescriptions', 'laboratory', 'new-lab'];
 		tabs.forEach(t => {
-			document.getElementById(`${t}Tab`).style.display = t === tabName ? 'block' : 'none';
+			const element = document.getElementById(`${t}Tab`);
+			if (element) {
+				element.style.display = t === tabName ? 'block' : 'none';
+			}
 		});
 		document.querySelectorAll('.tab').forEach((t, i) => {
 			t.classList.toggle('active', tabs[i] === tabName);
