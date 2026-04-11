@@ -216,6 +216,12 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 	function showTab(tabName) {
+		console.log('Switching to tab:', tabName);
+		console.log('consultationsTab:', document.getElementById('consultationsTab'));
+		console.log('prescriptionsTab:', document.getElementById('prescriptionsTab'));
+		console.log('laboratoryTab:', document.getElementById('laboratoryTab'));
+		console.log('newLabTab:', document.getElementById('newLabTab'));
+		
 		const tabs = ['consultations', 'prescriptions', 'laboratory', 'new-lab'];
 		tabs.forEach(t => {
 			const element = document.getElementById(`${t}Tab`);
