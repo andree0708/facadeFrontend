@@ -23,7 +23,7 @@ import Layout from '../layouts/Layout.astro';
 				<button class="tab active" onclick="showTab('consultations')">Consultas</button>
 				<button class="tab" onclick="showTab('prescriptions')">Prescripciones</button>
 				<button class="tab" onclick="showTab('laboratory')">Laboratorio</button>
-				<button class="tab" onclick="showTab('new-lab')">Solicitar Exámenes</button>
+				<button class="tab" onclick="showTab('newLab')">Solicitar Exámenes</button>
 			</div>
 
 			<div id="consultationsTab">
@@ -216,15 +216,11 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 	function showTab(tabName) {
-		console.log('Switching to tab:', tabName);
-		console.log('consultationsTab:', document.getElementById('consultationsTab'));
-		console.log('prescriptionsTab:', document.getElementById('prescriptionsTab'));
-		console.log('laboratoryTab:', document.getElementById('laboratoryTab'));
-		console.log('newLabTab:', document.getElementById('newLabTab'));
+		const tabs = ['consultations', 'prescriptions', 'laboratory', 'newLab'];
+		const elementIds = ['consultationsTab', 'prescriptionsTab', 'laboratoryTab', 'newLabTab'];
 		
-		const tabs = ['consultations', 'prescriptions', 'laboratory', 'new-lab'];
-		tabs.forEach(t => {
-			const element = document.getElementById(`${t}Tab`);
+		tabs.forEach((t, i) => {
+			const element = document.getElementById(elementIds[i]);
 			if (element) {
 				element.style.display = t === tabName ? 'block' : 'none';
 			}
