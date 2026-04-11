@@ -186,11 +186,12 @@ import Layout from '../layouts/Layout.astro';
 		scheduleBtn.disabled = true;
 		scheduleBtn.textContent = 'Agendando...';
 
+		const timeOnly = time.split(':')[0] + ':' + time.split(':')[1];
 		const requestBody = {
 			patientId: currentPatientId,
 			specialty: specialty,
 			doctorId: doctorId,
-			dateTime: date + 'T' + time
+			dateTime: date + 'T' + timeOnly
 		};
 
 		console.log('Sending request:', JSON.stringify(requestBody));
@@ -242,6 +243,11 @@ import Layout from '../layouts/Layout.astro';
 	async function loadAppointments() {
 		try {
 			const response = await fetch(`${API_URL}/historia/${patientId}`);
+			if (!response.ok) {
+				console.error('Error loading history:', response.status);
+				document.getElementById('appointmentsList').innerHTML = '<p style="color: #666; text-align: center;">Error al cargar citas</p>';
+				return;
+			}
 			const history = await response.json();
 			
 			const now = new Date();
